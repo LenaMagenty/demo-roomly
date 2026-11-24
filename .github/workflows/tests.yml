@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 jobs:
   tests:
@@ -24,3 +26,30 @@ jobs:
           path: artifacts/
           if-no-files-found: warn
           retention-days: 7
+
+  allure-report:
+    needs: tests
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download test artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: test-results
+          path: artifacts/
+      - name: Generate Allure report
+        run: npx --yes allure@3.33.0 generate artifacts/allure-results --output allure-report --clean
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload report to Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: allure-report
+      - name: Deploy report to Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
