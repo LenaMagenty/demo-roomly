@@ -234,17 +234,29 @@ python -m pytest
 
 Отчёты: `artifacts/junit.xml` (для CI), скриншоты и trace при падении — `artifacts/browser/`, результаты Allure — `artifacts/allure-results/`.
 
-Просмотр Allure-отчёта (нужен Allure Commandline, `scoop install allure` или с https://github.com/allure-framework/allure2/releases):
+**Где в CI смотреть скриншоты при падении.** Каталог `artifacts/` исключён из репозитория через `.gitignore` и создаётся только в момент прогона, поэтому на GitHub его нет. После прогона воркфлоу сохраняет содержимое артефактом:
+
+1. Вкладка **Actions** → выбрать прогон → кликнуть на название запуска.
+2. Прокрутить страницу вниз до раздела **Artifacts** → скачать **test-results**.
+3. Внутри архива: `browser/` — скриншоты и trace-архивы упавших тестов (создаются только при падении: `--screenshot only-on-failure --tracing retain-on-failure`), `junit.xml`, `allure-results/`.
+4. Скриншоты дефектов ручной проверки лежат в репозитории и доступны без прогона: `docs/screenshots/`.
+
+Хранятся 7 дней (retention-days в воркфлоу).
+
+Просмотр Allure-отчёта (нужен Node; Java не требуется):
 
 ```bash
-allure serve artifacts/allure-results
+npx --yes allure@3.33.0 classic artifacts/allure-results --output artifacts/allure-report --single-file
 ```
+
+Соберёт отчёт одним файлом `artifacts/allure-report/index.html`. Также отчёт публикуется на GitHub Pages после каждого прогона CI: https://lenamagenty.github.io/demo-roomly/
 
 ## Окружение и итог
 
 - ОС: Windows 11 Home (10.0.26200)
 - Браузер: Chromium 156.0.8078.4 (Playwright 1.64.1)
 - Python 3.x, pytest 8.3.5, pytest-playwright 0.7.1, allure-pytest 2.16.2
+- Node 26.13.1, Allure CLI 3.33.0 (запуск через `npx allure@3.33.0`, версия зафиксирована в инструкции и в CI-воркфлоу)
 - Итог прогона `python -m pytest`: **3 passed, 1 xfailed** — smoke + позитивный + негативный прошли, тест дефекта BUG-01 упал, как ожидалось (xfail strict). Отчёты: `artifacts/junit.xml`, `artifacts/allure-results/`.
 - Затраченное время: ~2 часа
 

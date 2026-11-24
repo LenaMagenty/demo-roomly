@@ -43,7 +43,7 @@ jobs:
           name: test-results
           path: artifacts/
       - name: Generate Allure report
-        run: npx --yes allure@3.33.0 generate artifacts/allure-results --output allure-report --clean
+        run: npx --yes allure@3.33.0 classic artifacts/allure-results --output allure-report
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload report to Pages
