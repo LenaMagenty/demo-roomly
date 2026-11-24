@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 import allure
 import pytest
@@ -72,11 +72,11 @@ def test_discovered_defect(page: Page, base_url: str):
     with allure.step("Открыть страницу бронирования"):
         page.goto(base_url, wait_until="domcontentloaded")
 
-    with allure.step("Заполнить форму: сегодня, прошедший интервал 00:30-01:00"):
+    with allure.step("Заполнить форму: сегодня, прошедший интервал (час назад, полчаса назад)"):
         page.locator("#room").select_option("medium")
         page.locator("#date").fill(date.today().isoformat())
-        page.locator("#start-time").fill("00:30")
-        page.locator("#end-time").fill("01:00")
+        page.locator("#start-time").fill((datetime.now() - timedelta(hours=1)).strftime("%H:%M"))
+        page.locator("#end-time").fill((datetime.now() - timedelta(minutes=30)).strftime("%H:%M"))
         page.locator("#participants").fill("6")
         page.locator("#name").fill("Иван Петров")
         page.locator("#email").fill("ivan.petrov@company.ru")
